@@ -38,7 +38,7 @@ targetNodes:
     - llsmp
 
 homepage: https://github.com/hosteur-sa-ch/rag-hosteur-filebeat.git
-baseUrl: https://raw.githubusercontent.com/hosteur-sa-ch/rag-hosteur-filebeat.git/main/
+baseUrl: https://raw.githubusercontent.com/hosteur-sa-ch/rag-hosteur-filebeat/main/
 logo: images/logo-hosteur_ico_2021.png
 
 description:
@@ -49,23 +49,34 @@ globals:
   env: ${env.name}
   nodeID: ${targetNodes.id}
 
+buttons:
+  - confirmText: Restart Filebeat
+    loadingText: retarting...
+    action: restart
+    caption: Restart
+    successText: /text/success.md
+
 onInstall:
     - deploy-filebeat
-
-
-success: Elastic Filebeat installed, edit filebeat.yml file to configure it.
 
 actions:
   deploy-filebeat:
     - cmd[${globals.nodeID}]: |-
-        rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch
-        wget -O /etc/yum.repos.d/elastic.repo https://raw.githubusercontent.com/hosteur-sa-ch/rag-hosteur-filebeat.git/main/res/elastic.repo
-        yum update -y
-        yum install filebeat -y
-        systemctl enable filebeat
-        chmod 666 -R /etc/filebeat/
+            rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch
+            wget -O /etc/yum.repos.d/elastic.repo https://raw.githubusercontent.com/hosteur-sa-ch/rag-hosteur-filebeat/main/res/elastic.repo
+            yum install filebeat -y
+            systemctl enable filebeat
+            chmod 666 -R /etc/filebeat/
+      user: root
     - api[${globals.nodeID}]: 
         method: jelastic.environment.file.AddFavorite
         params:
             path: /etc/filebeat/filebeat.yml
-    user: root
+            isDir: false
+  
+  restart:
+      - cmd[${globals.nodeID}]: systemctl restart filebeat
+      user: root
+      
+success: Elastic Filebeat installed, edit filebeat.yml file to configure it.
+
