@@ -59,6 +59,9 @@ buttons:
 onInstall:
     - deploy-filebeat
 
+onUninstall:
+    - remove-filebeat
+
 actions:
   deploy-filebeat:
     - cmd[${globals.nodeID}]: |-
@@ -66,7 +69,6 @@ actions:
             wget -O /etc/yum.repos.d/elastic.repo https://raw.githubusercontent.com/hosteur-sa-ch/rag-hosteur-filebeat/main/res/elastic.repo
             yum install filebeat -y
             systemctl enable filebeat
-            chmod 666 -R /etc/filebeat/
       user: root
     - api[${globals.nodeID}]: 
         method: jelastic.environment.file.AddFavorite
@@ -75,8 +77,12 @@ actions:
             isDir: false
   
   restart:
-      - cmd[${globals.nodeID}]: systemctl restart filebeat
+      cmd[${globals.nodeID}]: systemctl restart filebeat
       user: root
-      
+
+  remove-filebeat:
+    - cmd[${globals.nodeID}]: yum remove filebeat -y
+      user: root
+
 success: Elastic Filebeat installed, edit filebeat.yml file to configure it.
 
