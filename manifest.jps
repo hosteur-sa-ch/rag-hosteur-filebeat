@@ -83,6 +83,10 @@ actions:
   remove-filebeat:
     - cmd[${globals.nodeID}]: yum remove filebeat -y
       user: root
+    - api[${globals.nodeID}]: 
+        method: jelastic.environment.file.RemoveFavorite
+        params:
+            path: /etc/filebeat/filebeat.yml
 
 success: Elastic Filebeat installed, edit filebeat.yml file to configure it.
 
