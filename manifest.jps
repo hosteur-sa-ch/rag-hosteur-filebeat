@@ -1,0 +1,71 @@
+version: 0.1
+type: update
+id: filebeat-addon
+name: Install Elastic Filebeat
+
+categories:
+- apps/dev-and-admin-tools
+
+targetNodes:
+  nodeType:
+    - tomcat6
+    - tomcat7
+    - tomcat8
+    - tomcat85
+    - tomcat9
+    - tomcat
+    - tomee
+    - tomee-dockerized
+    - glassfish3
+    - glassfish4
+    - glassfish
+    - jetty
+    - jetty6
+    - apache
+    - apache2
+    - nginxphp
+    - apache2-ruby
+    - nginx-ruby
+    - nginx-dockerized
+    - nginxphp-dockerized
+    - nodejs
+    - apache-ruby
+    - apache-python
+    - nginxruby
+    - litespeedphp
+    - litespeedadc
+    - lemp
+    - llsmp
+
+homepage: https://github.com/hosteur-sa-ch/rag-hosteur-filebeat.git
+baseUrl: https://raw.githubusercontent.com/hosteur-sa-ch/rag-hosteur-filebeat.git/main/
+logo: images/logo-hosteur_ico_2021.png
+
+description:
+  text: Install Elastic FileBeat 
+  short: For grab log file and other
+
+globals:
+  env: ${env.name}
+  nodeID: ${targetNodes.id}
+
+onInstall:
+    - deploy-filebeat
+
+
+success: Elastic Filebeat installed, edit filebeat.yml file to configure it.
+
+actions:
+  deploy-filebeat:
+    - cmd[${globals.nodeID}]: |-
+        rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch
+        wget -O /etc/yum.repos.d/elastic.repo https://raw.githubusercontent.com/hosteur-sa-ch/rag-hosteur-filebeat.git/main/res/elastic.repo
+        yum update -y
+        yum install filebeat -y
+        systemctl enable filebeat
+        chmod 666 -R /etc/filebeat/
+    - api[${globals.nodeID}]: 
+        method: jelastic.environment.file.AddFavorite
+        params:
+            path: /etc/filebeat/filebeat.yml
+    user: root
